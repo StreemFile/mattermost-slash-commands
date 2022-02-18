@@ -18,7 +18,7 @@ public class RequestAccessController {
 //	private String createRequestAccess(@RequestParam)
 
 	@GetMapping("/test")
-	public String test() {
+	public TestDto test() {
 		return new TestDto("TEST");
 	}
 
