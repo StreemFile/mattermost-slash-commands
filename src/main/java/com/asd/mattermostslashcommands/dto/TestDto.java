@@ -1,4 +1,4 @@
-package com.asd.mattermostslashcommands;
+package com.asd.mattermostslashcommands.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
