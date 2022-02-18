@@ -3,6 +3,7 @@ package com.asd.mattermostslashcommands.controller;
 import com.asd.mattermostslashcommands.TestDto;
 import com.asd.mattermostslashcommands.service.RequestAccessService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/request-access")
 @RequiredArgsConstructor
+@Slf4j
 public class RequestAccessController {
 	private final RequestAccessService service;
 
@@ -18,7 +20,9 @@ public class RequestAccessController {
 //	private String createRequestAccess(@RequestParam)
 
 	@GetMapping("/test")
-	public TestDto test() {
+	public TestDto test(@RequestParam(required = false, name = "channel_id") String channelId) {
+		log.info("TEST CALLED");
+		log.info("CHANNEL_ID: " + channelId);
 		return new TestDto("TEST");
 	}
 
