@@ -25,11 +25,14 @@ public class RequestAccessController {
 
 	@PostMapping("/approve")
 	private void approveRequestAccess(@RequestParam(name = "text", required = false) String text,
-			@RequestParam(name = "context", required = false) String context) {
+			@RequestParam(name = "context", required = false) String context,
+			@RequestParam(name = "user_id", required = false) String userId) {
 		log.info("APPROVED");
 		log.info(text);
 		log.info("CON");
 		log.info(context);
+		log.info("USER");
+		log.info(userId);
 	}
 
 	@PostMapping("/reject")
