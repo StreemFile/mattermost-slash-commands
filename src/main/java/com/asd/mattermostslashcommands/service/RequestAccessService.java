@@ -116,6 +116,7 @@ public class RequestAccessService {
 			if (isApproved) {
 				AccessRequestDto accessRequestDto = getDevOpsAccessRequestDto(requestAccessEntity);
 				sendRequestAccess(accessRequestDto);
+				sendAnswerToDevops(requestAccessEntity);
 			} else {
 				sendAnswerToRequester(requestAccessEntity, false);
 			}
@@ -126,6 +127,7 @@ public class RequestAccessService {
 
 	private AccessRequestDto getDevOpsAccessRequestDto(RequestAccessEntity requestAccessEntity) {
 		AccessRequestDto accessRequestDto = AccessRequestDto.builder().build();
+		//TODO: change channel to devops
 		accessRequestDto.setChannel("@volodymyrmoisei");
 		AttachmentDto attachmentDto = AttachmentDto.builder().build();
 		StringBuilder attachmentText = new StringBuilder();
@@ -160,6 +162,15 @@ public class RequestAccessService {
 		text.append("\nRequest: " + requestAccessEntity.getRequest());
 		AccessRequestDto accessRequestDto = AccessRequestDto.builder().channel(requestAccessEntity.getRequester())
 				.text(text.toString()).build();
+		sendRequestAccess(accessRequestDto);
+	}
+
+	public void sendAnswerToDevops(RequestAccessEntity requestAccessEntity) throws IOException {
+		String text = "Request is approved!";
+		//TODO: change channel to devops
+		AccessRequestDto accessRequestDto = AccessRequestDto.builder()
+				.channel("@volodymyrmoisei")
+				.text(text).build();
 		sendRequestAccess(accessRequestDto);
 	}
 
