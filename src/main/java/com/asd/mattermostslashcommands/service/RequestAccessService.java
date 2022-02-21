@@ -54,7 +54,7 @@ public class RequestAccessService {
 		PostMethod postMethod = new PostMethod(webhookUrl);
 		postMethod.addRequestHeader("Content-Type", "application/json");
 		Gson gson = new Gson();
-		RequestEntity requestEntity = new StringRequestEntity(gson.toJson(accessRequestDto),"application/json", "UTF-8");
+		RequestEntity requestEntity = new StringRequestEntity(gson.toJson(accessRequestDto), "application/json", "UTF-8");
 		log.info(gson.toJson(accessRequestDto));
 		postMethod.setRequestEntity(requestEntity);
 		int code = httpClient.executeMethod(postMethod);
@@ -97,13 +97,8 @@ public class RequestAccessService {
 
 	private RequestAccessEntity getRequestAccessEntity(String username, String text) {
 		List<String> params = Arrays.asList(text.split(","));
-		return RequestAccessEntity.builder()
-				.project(params.get(0))
-				.request(params.get(1))
-				.manager(params.get(2).contains("@") ? params.get(2) : "@" + params.get(2))
-				.requester("@" + username)
-				.state(RequestAccessState.PENDING)
-				.build();
+		return RequestAccessEntity.builder().project(params.get(0)).request(params.get(1))
+				.manager(params.get(2).contains("@") ? params.get(2) : "@" + params.get(2)).requester("@" + username).state(RequestAccessState.PENDING).build();
 	}
 
 	public void answerToRequestAccessByPm(String requestBody, boolean isApproved) {
@@ -118,22 +113,55 @@ public class RequestAccessService {
 		requestAccessDao.updateRequestAccess(requestAccessEntity);
 		try {
 			sendAnswerToPm(requestAccessEntity, isApproved);
+			if (isApproved) {
+				AccessRequestDto accessRequestDto = getDevOpsAccessRequestDto(requestAccessEntity);
+				sendRequestAccess(accessRequestDto);
+			} else {
+				sendAnswerToRequester(requestAccessEntity, false);
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
 
+	private AccessRequestDto getDevOpsAccessRequestDto(RequestAccessEntity requestAccessEntity) {
+		AccessRequestDto accessRequestDto = AccessRequestDto.builder().build();
+		accessRequestDto.setChannel("@volodymyrmoisei");
+		AttachmentDto attachmentDto = AttachmentDto.builder().build();
+		StringBuilder attachmentText = new StringBuilder();
+		attachmentText.append("Access request");
+		attachmentText.append("\nProject: " + requestAccessEntity.getProject());
+		attachmentText.append("\nRequest: " + requestAccessEntity.getRequest());
+		attachmentText.append("\nRequester: " + requestAccessEntity.getRequester());
+		attachmentText.append("\nApproved by: " + requestAccessEntity.getManager());
+		attachmentText.append("\nRequest ID: " + requestAccessEntity.getId());
+		attachmentDto.setText(attachmentText.toString());
+		ActionsDto approve = getActionsDto(requestAccessEntity, "Approve", "https://mattermost-slash-commands.herokuapp.com/request-access/approve-by-devops");
+		List<ActionsDto> actionsDtos = Arrays.asList(approve);
+		attachmentDto.setActions(actionsDtos);
+		List<AttachmentDto> attachmentDtoList = new ArrayList<>();
+		attachmentDtoList.add(attachmentDto);
+		accessRequestDto.setAttachments(attachmentDtoList);
+		return accessRequestDto;
 	}
 
 	public void sendAnswerToPm(RequestAccessEntity requestAccessEntity, boolean isApproved) throws IOException {
 		String text = "Access request is ";
-		AccessRequestDto accessRequestDto = AccessRequestDto.builder()
-				.channel(requestAccessEntity.getManager())
-				.text(isApproved ? text + "approved" : text + "rejected")
-				.build();
+		AccessRequestDto accessRequestDto = AccessRequestDto.builder().channel(requestAccessEntity.getManager())
+				.text(isApproved ? text + "approved" : text + "rejected").build();
 		sendRequestAccess(accessRequestDto);
 	}
 
-
+	public void sendAnswerToRequester(RequestAccessEntity requestAccessEntity, boolean isApproved) throws IOException {
+		String str = "Your access request is ";
+		StringBuilder text = new StringBuilder();
+		text.append(isApproved ? str + "approved" : "rejected");
+		text.append("\nProject: " + requestAccessEntity.getProject());
+		text.append("\nRequest: " + requestAccessEntity.getRequest());
+		AccessRequestDto accessRequestDto = AccessRequestDto.builder().channel(requestAccessEntity.getRequester())
+				.text(text.toString()).build();
+		sendRequestAccess(accessRequestDto);
+	}
 
 	private Long findRequestId(String requestBody) {
 		Matcher matcher = idPattern.matcher(requestBody);
@@ -141,5 +169,21 @@ public class RequestAccessService {
 			return NumberUtils.createLong(matcher.group(1));
 		}
 		return 0l;
+	}
+
+	public void answerToRequestAccessByDevOps(String requestBody) {
+		long id = findRequestId(requestBody);
+		RequestAccessEntity requestAccessEntity = requestAccessDao.getRequestAccess(id);
+		if (requestAccessEntity == null) {
+			log.error("requestAccessEntity is null");
+			return;
+		}
+		requestAccessEntity.setState(RequestAccessState.APPROVED_BY_DEVOPS);
+		requestAccessDao.updateRequestAccess(requestAccessEntity);
+		try {
+			sendAnswerToRequester(requestAccessEntity, true);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 }

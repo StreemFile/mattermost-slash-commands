@@ -34,6 +34,11 @@ public class RequestAccessController {
 		service.answerToRequestAccessByPm(requestBody, false);
 	}
 
+	@PostMapping("/approve-by-devops")
+	private void approveRequestAccessByDevOps(@RequestBody String requestBody) {
+		service.answerToRequestAccessByDevOps(requestBody);
+	}
+
 	@GetMapping("/test")
 	public TestDto test(@RequestParam(required = false, name = "channel_id") String channelId) {
 		log.info("TEST CALLED");
