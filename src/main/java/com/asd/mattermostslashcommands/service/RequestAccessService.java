@@ -105,6 +105,7 @@ public class RequestAccessService {
 				.state(RequestAccessState.PENDING)
 				.build();
 	}
+
 	public void answerToRequestAccessByPm(String requestBody, boolean isApproved) {
 		long requestId = findRequestId(requestBody);
 		log.info("requestId: " + requestId);
@@ -115,7 +116,24 @@ public class RequestAccessService {
 		}
 		requestAccessEntity.setState(isApproved ? RequestAccessState.APPROVED_BY_PM : RequestAccessState.REJECTED);
 		requestAccessDao.updateRequestAccess(requestAccessEntity);
+		try {
+			sendAnswerToPm(requestAccessEntity, isApproved);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
 	}
+
+	public void sendAnswerToPm(RequestAccessEntity requestAccessEntity, boolean isApproved) throws IOException {
+		String text = "Access request is ";
+		AccessRequestDto accessRequestDto = AccessRequestDto.builder()
+				.channel(requestAccessEntity.getManager())
+				.text(isApproved ? text + "approved" : text + "rejected")
+				.build();
+		sendRequestAccess(accessRequestDto);
+	}
+
+
 
 	private Long findRequestId(String requestBody) {
 		Matcher matcher = idPattern.matcher(requestBody);

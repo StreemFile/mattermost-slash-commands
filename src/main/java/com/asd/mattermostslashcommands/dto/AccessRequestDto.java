@@ -19,5 +19,6 @@ import java.util.List;
 @Builder
 public class AccessRequestDto {
 	private String channel;
+	private String text;
 	private List<AttachmentDto> attachments;
 }
