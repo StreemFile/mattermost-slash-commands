@@ -155,7 +155,7 @@ public class RequestAccessService {
 	public void sendAnswerToRequester(RequestAccessEntity requestAccessEntity, boolean isApproved) throws IOException {
 		String str = "Your access request is ";
 		StringBuilder text = new StringBuilder();
-		text.append(isApproved ? str + "approved" : "rejected");
+		text.append(isApproved ? str + "approved" : str + "rejected");
 		text.append("\nProject: " + requestAccessEntity.getProject());
 		text.append("\nRequest: " + requestAccessEntity.getRequest());
 		AccessRequestDto accessRequestDto = AccessRequestDto.builder().channel(requestAccessEntity.getRequester())
