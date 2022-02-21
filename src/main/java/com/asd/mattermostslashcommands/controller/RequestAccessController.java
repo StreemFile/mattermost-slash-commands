@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,15 +25,9 @@ public class RequestAccessController {
 	}
 
 	@PostMapping("/approve")
-	private void approveRequestAccess(@RequestParam(name = "text", required = false) String text,
-			@RequestParam(name = "context", required = false) String context,
-			@RequestParam(name = "user_id", required = false) String userId) {
+	private void approveRequestAccess(@RequestBody String requestBody) {
 		log.info("APPROVED");
-		log.info(text);
-		log.info("CON");
-		log.info(context);
-		log.info("USER");
-		log.info(userId);
+		log.info(requestBody);
 	}
 
 	@PostMapping("/reject")
