@@ -26,17 +26,12 @@ public class RequestAccessController {
 
 	@PostMapping("/approve")
 	private void approveRequestAccess(@RequestBody String requestBody) {
-		log.info("APPROVED");
-		log.info(requestBody);
+		service.answerToRequestAccessByPm(requestBody, true);
 	}
 
 	@PostMapping("/reject")
-	private void rejectRequestAccess(@RequestParam(name = "text", required = false) String text,
-			@RequestParam(name = "context", required = false) String context) {
-		log.info("REJECTED");
-		log.info(text);
-		log.info("CON");
-		log.info(context);
+	private void rejectRequestAccess(@RequestBody String requestBody) {
+		service.answerToRequestAccessByPm(requestBody, false);
 	}
 
 	@GetMapping("/test")

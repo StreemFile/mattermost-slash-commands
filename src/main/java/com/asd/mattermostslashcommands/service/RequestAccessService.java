@@ -9,24 +9,30 @@ import com.asd.mattermostslashcommands.dto.IntegrationDto;
 import com.asd.mattermostslashcommands.entity.RequestAccessEntity;
 import com.asd.mattermostslashcommands.enums.RequestAccessState;
 import com.google.gson.Gson;
+import com.sun.tools.corba.se.idl.InvalidArgument;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.RequestEntity;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class RequestAccessService {
 	private final RequestAccessDao requestAccessDao;
+
+	private static final Pattern idPattern = Pattern.compile("\"action\":\"(\\d+)\"");
 
 	public void createRequestAccess(String username, String text) {
 		RequestAccessEntity requestAccessEntity = getRequestAccessEntity(username, text);
@@ -99,5 +105,24 @@ public class RequestAccessService {
 				.requester("@" + username)
 				.state(RequestAccessState.PENDING)
 				.build();
+	}
+	public void answerToRequestAccessByPm(String requestBody, boolean isApproved) {
+		long requestId = findRequestId(requestBody);
+		log.info("requestId: " + requestId);
+		try {
+			RequestAccessEntity requestAccessEntity = requestAccessDao.getRequestAccess(requestId);
+			requestAccessEntity.setState(isApproved ? RequestAccessState.APPROVED_BY_PM : RequestAccessState.REJECTED);
+			requestAccessDao.updateRequestAccess(requestAccessEntity);
+		} catch (InvalidArgument invalidArgument) {
+			invalidArgument.printStackTrace();
+		}
+	}
+
+	private Long findRequestId(String requestBody) {
+		Matcher matcher = idPattern.matcher(requestBody);
+		if (matcher.find()) {
+			return NumberUtils.createLong(matcher.group());
+		}
+		return 0l;
 	}
 }

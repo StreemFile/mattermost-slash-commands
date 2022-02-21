@@ -2,6 +2,7 @@ package com.asd.mattermostslashcommands.dao;
 
 import com.asd.mattermostslashcommands.entity.RequestAccessEntity;
 import com.asd.mattermostslashcommands.repository.RequestAccessRepository;
+import com.sun.tools.corba.se.idl.InvalidArgument;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -24,5 +25,9 @@ public class RequestAccessDao {
 
 	public void updateRequestAccess(RequestAccessEntity requestAccessEntity) {
 		requestAccessRepository.save(requestAccessEntity);
+	}
+
+	public RequestAccessEntity getRequestAccess(Long id) throws InvalidArgument {
+		return requestAccessRepository.findById(id).orElseThrow(InvalidArgument::new);
 	}
 }
