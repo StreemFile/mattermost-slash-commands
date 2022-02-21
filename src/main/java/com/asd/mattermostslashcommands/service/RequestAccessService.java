@@ -85,6 +85,8 @@ public class RequestAccessService {
 		integrationDto.setUrl(url);
 		ContextDto contextDto = ContextDto.builder().build();
 		contextDto.setAction(requestAccessEntity.getId().toString());
+		integrationDto.setContext(contextDto);
+		actionsDto.setIntegration(integrationDto);
 		return actionsDto;
 	}
 
