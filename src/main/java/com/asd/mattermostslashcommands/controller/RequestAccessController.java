@@ -22,6 +22,24 @@ public class RequestAccessController {
 		service.createRequestAccess(username, text);
 	}
 
+	@GetMapping("/approve")
+	private void approveRequestAccess(@RequestParam(name = "text", required = false) String text,
+			@RequestParam(name = "context", required = false) String context) {
+		log.info("APPROVED");
+		log.info(text);
+		log.info("CON");
+		log.info(context);
+	}
+
+	@GetMapping("/reject")
+	private void rejectRequestAccess(@RequestParam(name = "text", required = false) String text,
+			@RequestParam(name = "context", required = false) String context) {
+		log.info("REJECTED");
+		log.info(text);
+		log.info("CON");
+		log.info(context);
+	}
+
 	@GetMapping("/test")
 	public TestDto test(@RequestParam(required = false, name = "channel_id") String channelId) {
 		log.info("TEST CALLED");

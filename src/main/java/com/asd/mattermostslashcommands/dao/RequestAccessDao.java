@@ -21,4 +21,8 @@ public class RequestAccessDao {
 	public void createRequestAccess(RequestAccessEntity requestAccessEntity) {
 		requestAccessRepository.save(requestAccessEntity);
 	}
+
+	public void updateRequestAccess(RequestAccessEntity requestAccessEntity) {
+		requestAccessRepository.save(requestAccessEntity);
+	}
 }
