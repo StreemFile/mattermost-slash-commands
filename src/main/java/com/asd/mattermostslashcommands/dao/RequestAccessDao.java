@@ -2,7 +2,6 @@ package com.asd.mattermostslashcommands.dao;
 
 import com.asd.mattermostslashcommands.entity.RequestAccessEntity;
 import com.asd.mattermostslashcommands.repository.RequestAccessRepository;
-import com.sun.tools.corba.se.idl.InvalidArgument;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
