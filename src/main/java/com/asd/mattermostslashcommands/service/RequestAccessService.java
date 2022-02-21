@@ -120,7 +120,7 @@ public class RequestAccessService {
 	private Long findRequestId(String requestBody) {
 		Matcher matcher = idPattern.matcher(requestBody);
 		if (matcher.find()) {
-			return NumberUtils.createLong(matcher.group());
+			return NumberUtils.createLong(matcher.group(0));
 		}
 		return 0l;
 	}
