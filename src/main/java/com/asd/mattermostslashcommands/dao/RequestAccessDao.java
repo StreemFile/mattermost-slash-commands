@@ -27,7 +27,7 @@ public class RequestAccessDao {
 		requestAccessRepository.save(requestAccessEntity);
 	}
 
-	public RequestAccessEntity getRequestAccess(Long id) throws InvalidArgument {
-		return requestAccessRepository.findById(id).orElseThrow(InvalidArgument::new);
+	public RequestAccessEntity getRequestAccess(Long id) {
+		return requestAccessRepository.findById(id).orElseThrow(null);
 	}
 }

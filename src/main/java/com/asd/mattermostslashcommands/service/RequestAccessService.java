@@ -109,13 +109,13 @@ public class RequestAccessService {
 	public void answerToRequestAccessByPm(String requestBody, boolean isApproved) {
 		long requestId = findRequestId(requestBody);
 		log.info("requestId: " + requestId);
-		try {
-			RequestAccessEntity requestAccessEntity = requestAccessDao.getRequestAccess(requestId);
-			requestAccessEntity.setState(isApproved ? RequestAccessState.APPROVED_BY_PM : RequestAccessState.REJECTED);
-			requestAccessDao.updateRequestAccess(requestAccessEntity);
-		} catch (InvalidArgument invalidArgument) {
-			invalidArgument.printStackTrace();
+		RequestAccessEntity requestAccessEntity = requestAccessDao.getRequestAccess(requestId);
+		if (requestAccessEntity == null) {
+			log.error("requestAccessEntity is null");
+			return;
 		}
+		requestAccessEntity.setState(isApproved ? RequestAccessState.APPROVED_BY_PM : RequestAccessState.REJECTED);
+		requestAccessDao.updateRequestAccess(requestAccessEntity);
 	}
 
 	private Long findRequestId(String requestBody) {
