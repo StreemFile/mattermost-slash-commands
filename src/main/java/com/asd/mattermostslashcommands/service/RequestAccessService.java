@@ -116,7 +116,6 @@ public class RequestAccessService {
 			if (isApproved) {
 				AccessRequestDto accessRequestDto = getDevOpsAccessRequestDto(requestAccessEntity);
 				sendRequestAccess(accessRequestDto);
-				sendAnswerToDevops(requestAccessEntity);
 			} else {
 				sendAnswerToRequester(requestAccessEntity, false);
 			}
@@ -192,6 +191,7 @@ public class RequestAccessService {
 		requestAccessEntity.setState(RequestAccessState.APPROVED_BY_DEVOPS);
 		requestAccessDao.updateRequestAccess(requestAccessEntity);
 		try {
+			sendAnswerToDevops(requestAccessEntity);
 			sendAnswerToRequester(requestAccessEntity, true);
 		} catch (IOException e) {
 			e.printStackTrace();
