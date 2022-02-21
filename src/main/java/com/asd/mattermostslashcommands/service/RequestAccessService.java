@@ -10,6 +10,7 @@ import com.asd.mattermostslashcommands.entity.RequestAccessEntity;
 import com.asd.mattermostslashcommands.enums.RequestAccessState;
 import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.RequestEntity;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
@@ -22,6 +23,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class RequestAccessService {
 	private final RequestAccessDao requestAccessDao;
 
@@ -38,19 +40,22 @@ public class RequestAccessService {
 	}
 
 	private void sendRequestAccess(AccessRequestDto accessRequestDto) throws IOException {
+		log.info("sendRequestAccess");
 		String webhookUrl = "https://chat.asd.team/hooks/bynonba5aj8sjc83khm83toadh";
 		HttpClient httpClient = new HttpClient();
 		PostMethod postMethod = new PostMethod(webhookUrl);
 		postMethod.addRequestHeader("Content-Type", "application/json");
 		Gson gson = new Gson();
 		RequestEntity requestEntity = new StringRequestEntity(gson.toJson(accessRequestDto),"application/json", "UTF-8");
+		log.info(gson.toJson(accessRequestDto));
 		postMethod.setRequestEntity(requestEntity);
-		httpClient.executeMethod(postMethod);
+		int code = httpClient.executeMethod(postMethod);
+		log.info(code + "");
 	}
 
 	private AccessRequestDto getPmAccessRequestDto(RequestAccessEntity requestAccessEntity) {
 		AccessRequestDto accessRequestDto = AccessRequestDto.builder().build();
-		accessRequestDto.setChannel(requestAccessEntity.getRequester());
+		accessRequestDto.setChannel(requestAccessEntity.getManager());
 		AttachmentDto attachmentDto = AttachmentDto.builder().build();
 		StringBuilder attachmentText = new StringBuilder();
 		attachmentText.append("Access request");
