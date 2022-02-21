@@ -18,7 +18,4 @@ import lombok.NoArgsConstructor;
 public class IntegrationDto {
 	private String url;
 	private ContextDto context;
-
-	public IntegrationDto() {
-	}
 }

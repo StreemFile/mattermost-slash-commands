@@ -49,9 +49,9 @@ public class RequestAccessService {
 	}
 
 	private AccessRequestDto getPmAccessRequestDto(RequestAccessEntity requestAccessEntity) {
-		AccessRequestDto accessRequestDto = new AccessRequestDto();
+		AccessRequestDto accessRequestDto = AccessRequestDto.builder().build();
 		accessRequestDto.setChannel(requestAccessEntity.getRequester());
-		AttachmentDto attachmentDto = new AttachmentDto();
+		AttachmentDto attachmentDto = AttachmentDto.builder().build();
 		StringBuilder attachmentText = new StringBuilder();
 		attachmentText.append("Access request");
 		attachmentText.append("\nProject: " + requestAccessEntity.getProject());
@@ -67,12 +67,12 @@ public class RequestAccessService {
 	}
 
 	private ActionsDto getActionsDto(RequestAccessEntity requestAccessEntity, String name, String url) {
-		ActionsDto actionsDto = new ActionsDto();
+		ActionsDto actionsDto = ActionsDto.builder().build();
 		actionsDto.setId(name);
 		actionsDto.setName(name);
-		IntegrationDto integrationDto = new IntegrationDto();
+		IntegrationDto integrationDto = IntegrationDto.builder().build();
 		integrationDto.setUrl(url);
-		ContextDto contextDto = new ContextDto();
+		ContextDto contextDto = ContextDto.builder().build();
 		contextDto.setAction(requestAccessEntity.getId().toString());
 		return actionsDto;
 	}

@@ -20,7 +20,4 @@ import java.util.List;
 public class AccessRequestDto {
 	private String channel;
 	private List<AttachmentDto> attachments;
-
-	public AccessRequestDto() {
-	}
 }

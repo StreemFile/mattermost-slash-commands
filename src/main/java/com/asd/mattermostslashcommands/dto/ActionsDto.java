@@ -19,7 +19,4 @@ public class ActionsDto {
 	private String id;
 	private String name;
 	private IntegrationDto integration;
-
-	public ActionsDto() {
-	}
 }

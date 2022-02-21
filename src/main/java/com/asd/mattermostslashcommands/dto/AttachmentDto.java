@@ -20,7 +20,4 @@ import java.util.List;
 public class AttachmentDto {
 	private String text;
 	private List<ActionsDto> actions;
-
-	public AttachmentDto() {
-	}
 }

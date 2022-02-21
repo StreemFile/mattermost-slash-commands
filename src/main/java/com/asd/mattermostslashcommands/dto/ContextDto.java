@@ -17,7 +17,4 @@ import lombok.NoArgsConstructor;
 @Builder
 public class ContextDto {
 	private String action;
-
-	public ContextDto() {
-	}
 }
