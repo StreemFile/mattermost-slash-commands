@@ -18,6 +18,7 @@ import org.apache.commons.httpclient.HttpClient;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -70,6 +71,9 @@ public class RequestAccessService {
 		ActionsDto reject = getActionsDto(requestAccessEntity, "Reject", "https://mattermost-slash-commands.herokuapp.com/request-access/reject");
 		List<ActionsDto> actionsDtos = Arrays.asList(approve, reject);
 		attachmentDto.setActions(actionsDtos);
+		List<AttachmentDto> attachmentDtoList = new ArrayList<>();
+		attachmentDtoList.add(attachmentDto);
+		accessRequestDto.setAttachments(attachmentDtoList);
 		return accessRequestDto;
 	}
 
