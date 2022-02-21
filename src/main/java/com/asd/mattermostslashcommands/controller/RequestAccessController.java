@@ -5,6 +5,7 @@ import com.asd.mattermostslashcommands.service.RequestAccessService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,7 +23,7 @@ public class RequestAccessController {
 		service.createRequestAccess(username, text);
 	}
 
-	@GetMapping("/approve")
+	@PostMapping("/approve")
 	private void approveRequestAccess(@RequestParam(name = "text", required = false) String text,
 			@RequestParam(name = "context", required = false) String context) {
 		log.info("APPROVED");
@@ -31,7 +32,7 @@ public class RequestAccessController {
 		log.info(context);
 	}
 
-	@GetMapping("/reject")
+	@PostMapping("/reject")
 	private void rejectRequestAccess(@RequestParam(name = "text", required = false) String text,
 			@RequestParam(name = "context", required = false) String context) {
 		log.info("REJECTED");
