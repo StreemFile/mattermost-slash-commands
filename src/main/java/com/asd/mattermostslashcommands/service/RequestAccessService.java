@@ -38,8 +38,6 @@ public class RequestAccessService {
 		RequestAccessEntity requestAccessEntity = getRequestAccessEntity(username, text);
 		requestAccessDao.createRequestAccess(requestAccessEntity);
 		AccessRequestDto toPm = getPmAccessRequestDto(requestAccessEntity);
-		Gson gson = new Gson();
-		log.info(gson.toJson(toPm));
 		try {
 			sendRequestAccess(toPm);
 		} catch (IOException e) {
