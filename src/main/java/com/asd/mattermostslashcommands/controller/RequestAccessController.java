@@ -1,6 +1,5 @@
 package com.asd.mattermostslashcommands.controller;
 
-import com.asd.mattermostslashcommands.dto.TestDto;
 import com.asd.mattermostslashcommands.service.RequestAccessService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,17 +36,5 @@ public class RequestAccessController {
 	@PostMapping("/approve-by-devops")
 	private void approveRequestAccessByDevOps(@RequestBody String requestBody) {
 		service.answerToRequestAccessByDevOps(requestBody);
-	}
-
-	@GetMapping("/test")
-	public TestDto test(@RequestParam(required = false, name = "channel_id") String channelId) {
-		log.info("TEST CALLED");
-		log.info("CHANNEL_ID: " + channelId);
-		return new TestDto("TEST");
-	}
-
-	@GetMapping("/test2")
-	public void test2() {
-		System.out.println("DWADAMWFA");
 	}
 }
