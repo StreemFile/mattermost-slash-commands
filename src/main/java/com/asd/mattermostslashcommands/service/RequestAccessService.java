@@ -11,10 +11,10 @@ import com.asd.mattermostslashcommands.enums.RequestAccessState;
 import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.RequestEntity;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
-import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.stereotype.Service;
 
@@ -103,7 +103,12 @@ public class RequestAccessService {
 
 	public void answerToRequestAccessByPm(String requestBody, boolean isApproved) {
 		long requestId = findRequestId(requestBody);
-		log.info("requestId: " + requestId);
+		if (isApproved) {
+			log.info("Request with id " + requestId + " is approved by PM");
+		} else {
+			log.info("Request with id " + requestId + " is rejected by PM");
+		}
+		log.info(requestBody);
 		RequestAccessEntity requestAccessEntity = requestAccessDao.getRequestAccess(requestId);
 		if (requestAccessEntity == null) {
 			log.error("requestAccessEntity is null");
@@ -181,6 +186,8 @@ public class RequestAccessService {
 
 	public void answerToRequestAccessByDevOps(String requestBody) {
 		long id = findRequestId(requestBody);
+		log.info("Request with id " + id + " is approved by DevOps");
+		log.info(requestBody);
 		RequestAccessEntity requestAccessEntity = requestAccessDao.getRequestAccess(id);
 		if (requestAccessEntity == null) {
 			log.error("requestAccessEntity is null");
