@@ -32,6 +32,7 @@ public class RequestAccessService {
 	private final RequestAccessDao requestAccessDao;
 
 	private static final Pattern idPattern = Pattern.compile("\"action\":\"(\\d+)\"");
+	private static final Pattern devOpsPattern = Pattern.compile("\"user_name\":\"(.*)\",\"channel_id\"");
 
 	public void createRequestAccess(String username, String text) {
 		RequestAccessEntity requestAccessEntity = getRequestAccessEntity(username, text);
@@ -189,10 +190,12 @@ public class RequestAccessService {
 		log.info("Request with id " + id + " is approved by DevOps");
 		log.info(requestBody);
 		RequestAccessEntity requestAccessEntity = requestAccessDao.getRequestAccess(id);
+
 		if (requestAccessEntity == null) {
 			log.error("requestAccessEntity is null");
 			return;
 		}
+		requestAccessEntity.setDevops(getDevOps(requestBody));
 		requestAccessEntity.setState(RequestAccessState.APPROVED_BY_DEVOPS);
 		requestAccessDao.updateRequestAccess(requestAccessEntity);
 		try {
@@ -201,5 +204,13 @@ public class RequestAccessService {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	private String getDevOps(String requestBody) {
+		Matcher matcher = devOpsPattern.matcher(requestBody);
+		if (matcher.find()) {
+			return "@" + matcher.group(1);
+		}
+		return "";
 	}
 }

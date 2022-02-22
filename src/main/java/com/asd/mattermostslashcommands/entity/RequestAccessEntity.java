@@ -7,8 +7,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -27,10 +25,13 @@ public class RequestAccessEntity {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
 	private String project;
+	@Column(name = "permissions")
 	private String request;
 	private String manager;
 	private String requester;
 	private RequestAccessState state;
+	@Column(name = "approving_devops")
+	private String devops;
 	@CreationTimestamp
 	@Column(name = "created_at")
 	private LocalDateTime createdAt;
