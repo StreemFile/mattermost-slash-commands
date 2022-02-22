@@ -19,7 +19,6 @@ public class RequestAccessController {
 
 	@GetMapping
 	private void createRequestAccess(@RequestParam(name = "user_name") String username,
-									   @RequestParam(name = "user_id") String userId,
 									   @RequestParam(name = "text") String text) {
 		service.createRequestAccess(username, text);
 	}
