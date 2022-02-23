@@ -191,16 +191,17 @@ public class RequestAccessService {
 	}
 
 	public void sendAnswerToRequester(RequestAccessEntity requestAccessEntity, boolean isApproved) throws IOException {
-		String str = "Your access request is ";
+		String str = "Your access request with id " + requestAccessEntity.getId() + "is ";
 		StringBuilder text = new StringBuilder();
 		text.append(isApproved ? str + "approved" : str + "rejected");
 		text.append("\nProject: " + requestAccessEntity.getProject());
 		text.append("\nRequest: " + requestAccessEntity.getRequest());
 		AccessRequestDto accessRequestDto = getAccessRequestDto(requestAccessEntity.getRequester(), text.toString());
 		if (isApproved) {
+			Map<String, String> textMap = Collections.singletonMap(text.toString(), "");
 			Map<String, String> actionsMap = new LinkedHashMap<>();
 			actionsMap.put("Submit", "https://mattermost-slash-commands.herokuapp.com/request-access/approve/user");
-			accessRequestDto = getAccessRequestDto(requestAccessEntity.getId(), requestAccessEntity.getRequester(), Collections.EMPTY_MAP, actionsMap);
+			accessRequestDto = getAccessRequestDto(requestAccessEntity.getId(), requestAccessEntity.getRequester(), textMap, actionsMap);
 		}
 		sendRequestAccess(accessRequestDto);
 	}
