@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -67,12 +68,12 @@ public class RequestAccessService {
 	}
 
 	private AccessRequestDto getPmAccessRequestDto(RequestAccessEntity requestAccessEntity) {
-		Map<String, String> attachmentText = new LinkedHashMap<>();
-		attachmentText.put("Access request", "");
-		attachmentText.put("Project", requestAccessEntity.getProject());
-		attachmentText.put("Request", requestAccessEntity.getRequest());
-		attachmentText.put("Requester", requestAccessEntity.getRequester());
-		attachmentText.put("Request ID", requestAccessEntity.getId().toString());
+		List<String> attachmentText = new LinkedList<>();
+		attachmentText.add("Access request");
+		attachmentText.add("Project: " + requestAccessEntity.getProject());
+		attachmentText.add("Request: " + requestAccessEntity.getRequest());
+		attachmentText.add("Requester: " +  requestAccessEntity.getRequester());
+		attachmentText.add("Request ID: " +  requestAccessEntity.getId().toString());
 		Map<String, String> attachmentActions = new LinkedHashMap<>();
 		attachmentActions.put("Approve", "https://mattermost-slash-commands.herokuapp.com/request-access/approve/pm");
 		attachmentActions.put("Reject", "https://mattermost-slash-commands.herokuapp.com/request-access/reject/pm");
@@ -80,13 +81,13 @@ public class RequestAccessService {
 	}
 
 	private AccessRequestDto getAccessRequestDto(Long requestId, String channel,
-			Map<String, String> textMap, Map<String, String> actionsMap) {
+			List<String> text, Map<String, String> actionsMap) {
 		AccessRequestDto accessRequestDto = AccessRequestDto.builder().build();
 		accessRequestDto.setChannel(channel);
 		AttachmentDto attachmentDto = AttachmentDto.builder().build();
-		if (!CollectionUtils.isEmpty(textMap)) {
+		if (!CollectionUtils.isEmpty(text)) {
 			StringBuilder attachmentText = new StringBuilder();
-			textMap.forEach((k, v) -> attachmentText.append("\n" + k + ": " + v));
+			text.forEach(item -> attachmentText.append("\n" + item));
 			attachmentDto.setText(attachmentText.toString());
 		}
 		if (!CollectionUtils.isEmpty(actionsMap)) {
@@ -122,12 +123,12 @@ public class RequestAccessService {
 	}
 
 	private AccessRequestDto getUserRequestCreationConfirmation(RequestAccessEntity requestAccessEntity) {
-		Map<String, String> attachmentText = new LinkedHashMap<>();
-		attachmentText.put("Your access request was successfully created!", "");
-		attachmentText.put("Project", requestAccessEntity.getProject());
-		attachmentText.put("Request", requestAccessEntity.getRequest());
-		attachmentText.put("Manager", requestAccessEntity.getManager());
-		attachmentText.put("Request ID", requestAccessEntity.getId().toString());
+		List<String> attachmentText = new LinkedList<>();
+		attachmentText.add("Your access request was successfully created!");
+		attachmentText.add("Project: " + requestAccessEntity.getProject());
+		attachmentText.add("Request: " + requestAccessEntity.getRequest());
+		attachmentText.add("Manager: " + requestAccessEntity.getManager());
+		attachmentText.add("Request ID: " + requestAccessEntity.getId().toString());
 		return getAccessRequestDto(requestAccessEntity.getId(), requestAccessEntity.getRequester(), attachmentText, Collections.EMPTY_MAP);
 	}
 
@@ -172,13 +173,13 @@ public class RequestAccessService {
 	}
 
 	private AccessRequestDto getDevOpsAccessRequestDto(RequestAccessEntity requestAccessEntity) {
-		Map<String, String> attachmentText = new LinkedHashMap<>();
-		attachmentText.put("Access request", "");
-		attachmentText.put("Project", requestAccessEntity.getProject());
-		attachmentText.put("Request", requestAccessEntity.getRequest());
-		attachmentText.put("Requester", requestAccessEntity.getRequester());
-		attachmentText.put("Approved by", requestAccessEntity.getManager());
-		attachmentText.put("Request ID", requestAccessEntity.getId().toString());
+		List<String> attachmentText = new LinkedList<>();
+		attachmentText.add("Access request");
+		attachmentText.add("Project: " + requestAccessEntity.getProject());
+		attachmentText.add("Request: " + requestAccessEntity.getRequest());
+		attachmentText.add("Requester: " + requestAccessEntity.getRequester());
+		attachmentText.add("Approved by: " + requestAccessEntity.getManager());
+		attachmentText.add("Request ID: " + requestAccessEntity.getId().toString());
 		Map<String, String> attachmentActions = new LinkedHashMap<>();
 		attachmentActions.put("Approve", "https://mattermost-slash-commands.herokuapp.com/request-access/approve/devops");
 		return getAccessRequestDto(requestAccessEntity.getId(), "devops", attachmentText, attachmentActions);
@@ -191,17 +192,18 @@ public class RequestAccessService {
 	}
 
 	public void sendAnswerToRequester(RequestAccessEntity requestAccessEntity, boolean isApproved) throws IOException {
-		String str = "Your access request with id " + requestAccessEntity.getId() + "is ";
+		String str = "Your access request with id " + requestAccessEntity.getId() + " is ";
 		StringBuilder text = new StringBuilder();
 		text.append(isApproved ? str + "approved" : str + "rejected");
 		text.append("\nProject: " + requestAccessEntity.getProject());
 		text.append("\nRequest: " + requestAccessEntity.getRequest());
 		AccessRequestDto accessRequestDto = getAccessRequestDto(requestAccessEntity.getRequester(), text.toString());
 		if (isApproved) {
-			Map<String, String> textMap = Collections.singletonMap(text.toString(), "");
+			text.append("\nClick button below to submit that you have new permissions");
 			Map<String, String> actionsMap = new LinkedHashMap<>();
 			actionsMap.put("Submit", "https://mattermost-slash-commands.herokuapp.com/request-access/approve/user");
-			accessRequestDto = getAccessRequestDto(requestAccessEntity.getId(), requestAccessEntity.getRequester(), textMap, actionsMap);
+			accessRequestDto = getAccessRequestDto(requestAccessEntity.getId(), requestAccessEntity.getRequester(),
+					Collections.singletonList(text.toString()), actionsMap);
 		}
 		sendRequestAccess(accessRequestDto);
 	}
