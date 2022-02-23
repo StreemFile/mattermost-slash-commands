@@ -17,11 +17,15 @@ import org.apache.commons.httpclient.methods.RequestEntity;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -38,8 +42,10 @@ public class RequestAccessService {
 		RequestAccessEntity requestAccessEntity = getRequestAccessEntity(username, text);
 		requestAccessDao.createRequestAccess(requestAccessEntity);
 		AccessRequestDto toPm = getPmAccessRequestDto(requestAccessEntity);
+		AccessRequestDto toUser = getUserRequestCreationConfirmation(requestAccessEntity);
 		try {
 			sendRequestAccess(toPm);
+			sendRequestAccess(toUser);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -61,38 +67,70 @@ public class RequestAccessService {
 	}
 
 	private AccessRequestDto getPmAccessRequestDto(RequestAccessEntity requestAccessEntity) {
+		Map<String, String> attachmentText = new LinkedHashMap<>();
+		attachmentText.put("Access request", "");
+		attachmentText.put("Project", requestAccessEntity.getProject());
+		attachmentText.put("Request", requestAccessEntity.getRequest());
+		attachmentText.put("Requester", requestAccessEntity.getRequester());
+		attachmentText.put("Request ID", requestAccessEntity.getId().toString());
+		Map<String, String> attachmentActions = new LinkedHashMap<>();
+		attachmentActions.put("Approve", "https://mattermost-slash-commands.herokuapp.com/request-access/approve/pm");
+		attachmentActions.put("Reject", "https://mattermost-slash-commands.herokuapp.com/request-access/reject/pm");
+		return getAccessRequestDto(requestAccessEntity.getId(), requestAccessEntity.getManager(), attachmentText, attachmentActions);
+	}
+
+	private AccessRequestDto getAccessRequestDto(Long requestId, String channel,
+			Map<String, String> textMap, Map<String, String> actionsMap) {
 		AccessRequestDto accessRequestDto = AccessRequestDto.builder().build();
-		accessRequestDto.setChannel(requestAccessEntity.getManager());
+		accessRequestDto.setChannel(channel);
 		AttachmentDto attachmentDto = AttachmentDto.builder().build();
-		StringBuilder attachmentText = new StringBuilder();
-		attachmentText.append("Access request");
-		attachmentText.append("\nProject: " + requestAccessEntity.getProject());
-		attachmentText.append("\nRequest: " + requestAccessEntity.getRequest());
-		attachmentText.append("\nRequester: " + requestAccessEntity.getRequester());
-		attachmentText.append("\nRequest ID: " + requestAccessEntity.getId());
-		attachmentDto.setText(attachmentText.toString());
-		ActionsDto approve = getActionsDto(requestAccessEntity, "Approve", "https://mattermost-slash-commands.herokuapp.com/request-access/approve/pm");
-		ActionsDto reject = getActionsDto(requestAccessEntity, "Reject", "https://mattermost-slash-commands.herokuapp.com/request-access/reject/pm");
-		List<ActionsDto> actionsDtos = Arrays.asList(approve, reject);
-		attachmentDto.setActions(actionsDtos);
+		if (!CollectionUtils.isEmpty(textMap)) {
+			StringBuilder attachmentText = new StringBuilder();
+			textMap.forEach((k, v) -> attachmentText.append("\n" + k + ": " + v));
+			attachmentDto.setText(attachmentText.toString());
+		}
+		if (!CollectionUtils.isEmpty(actionsMap)) {
+			List<ActionsDto> actionsDtoList = new ArrayList<>();
+			actionsMap.forEach((k, v) -> actionsDtoList.add(getActionsDto(requestId, k, v)));
+			attachmentDto.setActions(actionsDtoList);
+		}
 		List<AttachmentDto> attachmentDtoList = new ArrayList<>();
 		attachmentDtoList.add(attachmentDto);
 		accessRequestDto.setAttachments(attachmentDtoList);
 		return accessRequestDto;
 	}
 
-	private ActionsDto getActionsDto(RequestAccessEntity requestAccessEntity, String name, String url) {
+	private AccessRequestDto getAccessRequestDto(String channel, String text) {
+		return AccessRequestDto.builder()
+				.channel(channel)
+				.text(text)
+				.build();
+	}
+
+
+	private ActionsDto getActionsDto(Long requestId, String name, String url) {
 		ActionsDto actionsDto = ActionsDto.builder().build();
 		actionsDto.setId(name);
 		actionsDto.setName(name);
 		IntegrationDto integrationDto = IntegrationDto.builder().build();
 		integrationDto.setUrl(url);
 		ContextDto contextDto = ContextDto.builder().build();
-		contextDto.setAction(requestAccessEntity.getId().toString());
+		contextDto.setAction(requestId.toString());
 		integrationDto.setContext(contextDto);
 		actionsDto.setIntegration(integrationDto);
 		return actionsDto;
 	}
+
+	private AccessRequestDto getUserRequestCreationConfirmation(RequestAccessEntity requestAccessEntity) {
+		Map<String, String> attachmentText = new LinkedHashMap<>();
+		attachmentText.put("Your access request was successfully created!", "");
+		attachmentText.put("Project", requestAccessEntity.getProject());
+		attachmentText.put("Request", requestAccessEntity.getRequest());
+		attachmentText.put("Requester", requestAccessEntity.getRequester());
+		attachmentText.put("Request ID", requestAccessEntity.getId().toString());
+		return getAccessRequestDto(requestAccessEntity.getId(), requestAccessEntity.getRequester(), attachmentText, Collections.EMPTY_MAP);
+	}
+
 
 	private RequestAccessEntity getRequestAccessEntity(String username, String text) {
 		List<String> params = Arrays.asList(text.split(","));
@@ -134,32 +172,21 @@ public class RequestAccessService {
 	}
 
 	private AccessRequestDto getDevOpsAccessRequestDto(RequestAccessEntity requestAccessEntity) {
-		AccessRequestDto accessRequestDto = AccessRequestDto.builder().build();
-		accessRequestDto.setChannel("devops");
-		AttachmentDto attachmentDto = AttachmentDto.builder().build();
-		StringBuilder attachmentText = new StringBuilder();
-		attachmentText.append("Access request");
-		attachmentText.append("\nProject: " + requestAccessEntity.getProject());
-		attachmentText.append("\nRequest: " + requestAccessEntity.getRequest());
-		attachmentText.append("\nRequester: " + requestAccessEntity.getRequester());
-		attachmentText.append("\nApproved by: " + requestAccessEntity.getManager());
-		attachmentText.append("\nRequest ID: " + requestAccessEntity.getId());
-		attachmentDto.setText(attachmentText.toString());
-		ActionsDto approve = getActionsDto(requestAccessEntity, "Approve", "https://mattermost-slash-commands.herokuapp.com/request-access/approve/devops");
-		List<ActionsDto> actionsDtos = Arrays.asList(approve);
-		attachmentDto.setActions(actionsDtos);
-		List<AttachmentDto> attachmentDtoList = new ArrayList<>();
-		attachmentDtoList.add(attachmentDto);
-		accessRequestDto.setAttachments(attachmentDtoList);
-		return accessRequestDto;
+		Map<String, String> attachmentText = new LinkedHashMap<>();
+		attachmentText.put("Access request", "");
+		attachmentText.put("Project", requestAccessEntity.getProject());
+		attachmentText.put("Request", requestAccessEntity.getRequest());
+		attachmentText.put("Requester", requestAccessEntity.getRequester());
+		attachmentText.put("Approved by", requestAccessEntity.getManager());
+		attachmentText.put("Request ID", requestAccessEntity.getId().toString());
+		Map<String, String> attachmentActions = new LinkedHashMap<>();
+		attachmentActions.put("Approve", "https://mattermost-slash-commands.herokuapp.com/request-access/approve/devops");
+		return getAccessRequestDto(requestAccessEntity.getId(), "devops", attachmentText, attachmentActions);
 	}
 
 	public void sendAnswerToPm(RequestAccessEntity requestAccessEntity, boolean isApproved) throws IOException {
 		String text = "Access request is ";
-		AccessRequestDto accessRequestDto = AccessRequestDto.builder()
-				.channel(requestAccessEntity.getManager())
-				.text(isApproved ? text + "approved" : text + "rejected")
-				.build();
+		AccessRequestDto accessRequestDto = getAccessRequestDto(requestAccessEntity.getManager(), isApproved ? text + "approved" : text + "rejected" );
 		sendRequestAccess(accessRequestDto);
 	}
 
@@ -169,29 +196,18 @@ public class RequestAccessService {
 		text.append(isApproved ? str + "approved" : str + "rejected");
 		text.append("\nProject: " + requestAccessEntity.getProject());
 		text.append("\nRequest: " + requestAccessEntity.getRequest());
-		AccessRequestDto accessRequestDto = AccessRequestDto.builder()
-				.channel(requestAccessEntity.getRequester())
-				.text(text.toString())
-				.build();
+		AccessRequestDto accessRequestDto = getAccessRequestDto(requestAccessEntity.getRequester(), text.toString());
 		if (isApproved) {
-			ActionsDto submit = getActionsDto(requestAccessEntity, "Submit", "https://mattermost-slash-commands.herokuapp.com/request-access/approve/user");
-			List<ActionsDto> actionsDtos = Arrays.asList(submit);
-			AttachmentDto attachmentDto = AttachmentDto.builder()
-					.text("Click button below to submit that you have requested permissions.")
-					.actions(actionsDtos)
-					.build();
-			List<AttachmentDto> attachmentDtoList = Arrays.asList(attachmentDto);
-			accessRequestDto.setAttachments(attachmentDtoList);
+			Map<String, String> actionsMap = new LinkedHashMap<>();
+			actionsMap.put("Submit", "https://mattermost-slash-commands.herokuapp.com/request-access/approve/user");
+			accessRequestDto = getAccessRequestDto(requestAccessEntity.getId(), requestAccessEntity.getRequester(), Collections.EMPTY_MAP, actionsMap);
 		}
 		sendRequestAccess(accessRequestDto);
 	}
 
 	public void sendAnswerToDevops() throws IOException {
 		String text = "Request is approved!";
-		AccessRequestDto accessRequestDto = AccessRequestDto.builder()
-				.channel("devops")
-				.text(text)
-				.build();
+		AccessRequestDto accessRequestDto = getAccessRequestDto("devops", text);
 		sendRequestAccess(accessRequestDto);
 	}
 
@@ -245,10 +261,7 @@ public class RequestAccessService {
 
 	private void sendAnswerToUserOnSubmit(String username) {
 		String text = "Submitted!";
-		AccessRequestDto accessRequestDto = AccessRequestDto.builder()
-				.channel(username)
-				.text(text)
-				.build();
+		AccessRequestDto accessRequestDto = getAccessRequestDto(username, text);
 		try {
 			sendRequestAccess(accessRequestDto);
 		} catch (IOException e) {
