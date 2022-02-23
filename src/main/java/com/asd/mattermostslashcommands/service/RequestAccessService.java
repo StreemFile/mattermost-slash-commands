@@ -71,8 +71,8 @@ public class RequestAccessService {
 		attachmentText.append("\nRequester: " + requestAccessEntity.getRequester());
 		attachmentText.append("\nRequest ID: " + requestAccessEntity.getId());
 		attachmentDto.setText(attachmentText.toString());
-		ActionsDto approve = getActionsDto(requestAccessEntity, "Approve", "https://mattermost-slash-commands.herokuapp.com/request-access/approve");
-		ActionsDto reject = getActionsDto(requestAccessEntity, "Reject", "https://mattermost-slash-commands.herokuapp.com/request-access/reject");
+		ActionsDto approve = getActionsDto(requestAccessEntity, "Approve", "https://mattermost-slash-commands.herokuapp.com/request-access/approve/pm");
+		ActionsDto reject = getActionsDto(requestAccessEntity, "Reject", "https://mattermost-slash-commands.herokuapp.com/request-access/reject/pm");
 		List<ActionsDto> actionsDtos = Arrays.asList(approve, reject);
 		attachmentDto.setActions(actionsDtos);
 		List<AttachmentDto> attachmentDtoList = new ArrayList<>();
@@ -140,7 +140,7 @@ public class RequestAccessService {
 		attachmentText.append("\nApproved by: " + requestAccessEntity.getManager());
 		attachmentText.append("\nRequest ID: " + requestAccessEntity.getId());
 		attachmentDto.setText(attachmentText.toString());
-		ActionsDto approve = getActionsDto(requestAccessEntity, "Approve", "https://mattermost-slash-commands.herokuapp.com/request-access/approve-by-devops");
+		ActionsDto approve = getActionsDto(requestAccessEntity, "Approve", "https://mattermost-slash-commands.herokuapp.com/request-access/approve/devops");
 		List<ActionsDto> actionsDtos = Arrays.asList(approve);
 		attachmentDto.setActions(actionsDtos);
 		List<AttachmentDto> attachmentDtoList = new ArrayList<>();
@@ -167,7 +167,7 @@ public class RequestAccessService {
 		sendRequestAccess(accessRequestDto);
 	}
 
-	public void sendAnswerToDevops(RequestAccessEntity requestAccessEntity) throws IOException {
+	public void sendAnswerToDevops() throws IOException {
 		String text = "Request is approved!";
 		AccessRequestDto accessRequestDto = AccessRequestDto.builder()
 				.channel("devops")
@@ -197,7 +197,7 @@ public class RequestAccessService {
 		requestAccessEntity.setState(RequestAccessState.APPROVED_BY_DEVOPS);
 		requestAccessDao.updateRequestAccess(requestAccessEntity);
 		try {
-			sendAnswerToDevops(requestAccessEntity);
+			sendAnswerToDevops();
 			sendAnswerToRequester(requestAccessEntity, true);
 		} catch (IOException e) {
 			e.printStackTrace();

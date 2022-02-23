@@ -23,18 +23,24 @@ public class RequestAccessController {
 		service.createRequestAccess(username, text);
 	}
 
-	@PostMapping("/approve")
+	@PostMapping("/approve/pm")
 	private void approveRequestAccess(@RequestBody String requestBody) {
 		service.answerToRequestAccessByPm(requestBody, true);
 	}
 
-	@PostMapping("/reject")
+	@PostMapping("/reject/pm")
 	private void rejectRequestAccess(@RequestBody String requestBody) {
 		service.answerToRequestAccessByPm(requestBody, false);
 	}
 
-	@PostMapping("/approve-by-devops")
+	@PostMapping("/approve/devops")
 	private void approveRequestAccessByDevOps(@RequestBody String requestBody) {
 		service.answerToRequestAccessByDevOps(requestBody);
 	}
+
+	@PostMapping("/approve/user")
+	private void approveRequestAccessUser(@RequestBody String requestBody) {
+		service.answerToRequestAccessByDevOps(requestBody);
+	}
+
 }
