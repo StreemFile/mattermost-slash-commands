@@ -48,7 +48,7 @@ public class RequestAccessService {
 
 	private void sendRequestAccess(AccessRequestDto accessRequestDto) throws IOException {
 		log.info("sendRequestAccess");
-		String webhookUrl = "https://chat.asd.team/hooks/bynonba5aj8sjc83khm83toadh";
+		String webhookUrl = "https://chat.asd.team/hooks/87wrppcejjfztqshkw7qr5ux1y";
 		HttpClient httpClient = new HttpClient();
 		PostMethod postMethod = new PostMethod(webhookUrl);
 		postMethod.addRequestHeader("Content-Type", "application/json");
