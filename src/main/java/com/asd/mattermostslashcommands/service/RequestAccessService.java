@@ -190,7 +190,8 @@ public class RequestAccessService {
 		String text = "Request is approved!";
 		AccessRequestDto accessRequestDto = AccessRequestDto.builder()
 				.channel("devops")
-				.text(text).build();
+				.text(text)
+				.build();
 		sendRequestAccess(accessRequestDto);
 	}
 
@@ -207,7 +208,6 @@ public class RequestAccessService {
 		log.info("Request with id " + id + " is approved by DevOps");
 		log.info(requestBody);
 		RequestAccessEntity requestAccessEntity = requestAccessDao.getRequestAccess(id);
-
 		if (requestAccessEntity == null) {
 			log.error("requestAccessEntity is null");
 			return;
@@ -240,5 +240,19 @@ public class RequestAccessService {
 		}
 		requestAccessEntity.setState(RequestAccessState.APPROVED_BY_USER);
 		requestAccessDao.updateRequestAccess(requestAccessEntity);
+		sendAnswerToUserOnSubmit(requestAccessEntity.getRequester());
+	}
+
+	private void sendAnswerToUserOnSubmit(String username) {
+		String text = "Submitted!";
+		AccessRequestDto accessRequestDto = AccessRequestDto.builder()
+				.channel(username)
+				.text(text)
+				.build();
+		try {
+			sendRequestAccess(accessRequestDto);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 }
