@@ -126,7 +126,7 @@ public class RequestAccessService {
 		attachmentText.put("Your access request was successfully created!", "");
 		attachmentText.put("Project", requestAccessEntity.getProject());
 		attachmentText.put("Request", requestAccessEntity.getRequest());
-		attachmentText.put("Requester", requestAccessEntity.getRequester());
+		attachmentText.put("Manager", requestAccessEntity.getManager());
 		attachmentText.put("Request ID", requestAccessEntity.getId().toString());
 		return getAccessRequestDto(requestAccessEntity.getId(), requestAccessEntity.getRequester(), attachmentText, Collections.EMPTY_MAP);
 	}
@@ -135,10 +135,10 @@ public class RequestAccessService {
 	private RequestAccessEntity getRequestAccessEntity(String username, String text) {
 		List<String> params = Arrays.asList(text.split(","));
 		return RequestAccessEntity.builder()
-				.project(params.get(0))
-				.request(params.get(1))
-				.manager(params.get(2).contains("@") ? params.get(2) : "@" + params.get(2))
-				.requester("@" + username)
+				.project(params.get(0).trim())
+				.request(params.get(1).trim())
+				.manager(params.get(2).contains("@") ? params.get(2).trim() : "@" + params.get(2).trim())
+				.requester("@" + username.trim())
 				.state(RequestAccessState.PENDING)
 				.build();
 	}
