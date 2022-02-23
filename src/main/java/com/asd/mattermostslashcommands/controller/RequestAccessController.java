@@ -39,8 +39,8 @@ public class RequestAccessController {
 	}
 
 	@PostMapping("/approve/user")
-	private void approveRequestAccessUser(@RequestBody String requestBody) {
-		service.answerToRequestAccessByDevOps(requestBody);
+	private void approveRequestAccessByUser(@RequestBody String requestBody) {
+		service.approveRequestAccessByUser(requestBody);
 	}
 
 }

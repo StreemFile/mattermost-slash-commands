@@ -96,8 +96,13 @@ public class RequestAccessService {
 
 	private RequestAccessEntity getRequestAccessEntity(String username, String text) {
 		List<String> params = Arrays.asList(text.split(","));
-		return RequestAccessEntity.builder().project(params.get(0)).request(params.get(1))
-				.manager(params.get(2).contains("@") ? params.get(2) : "@" + params.get(2)).requester("@" + username).state(RequestAccessState.PENDING).build();
+		return RequestAccessEntity.builder()
+				.project(params.get(0))
+				.request(params.get(1))
+				.manager(params.get(2).contains("@") ? params.get(2) : "@" + params.get(2))
+				.requester("@" + username)
+				.state(RequestAccessState.PENDING)
+				.build();
 	}
 
 	public void answerToRequestAccessByPm(String requestBody, boolean isApproved) {
@@ -151,8 +156,10 @@ public class RequestAccessService {
 
 	public void sendAnswerToPm(RequestAccessEntity requestAccessEntity, boolean isApproved) throws IOException {
 		String text = "Access request is ";
-		AccessRequestDto accessRequestDto = AccessRequestDto.builder().channel(requestAccessEntity.getManager())
-				.text(isApproved ? text + "approved" : text + "rejected").build();
+		AccessRequestDto accessRequestDto = AccessRequestDto.builder()
+				.channel(requestAccessEntity.getManager())
+				.text(isApproved ? text + "approved" : text + "rejected")
+				.build();
 		sendRequestAccess(accessRequestDto);
 	}
 
@@ -162,8 +169,20 @@ public class RequestAccessService {
 		text.append(isApproved ? str + "approved" : str + "rejected");
 		text.append("\nProject: " + requestAccessEntity.getProject());
 		text.append("\nRequest: " + requestAccessEntity.getRequest());
-		AccessRequestDto accessRequestDto = AccessRequestDto.builder().channel(requestAccessEntity.getRequester())
-				.text(text.toString()).build();
+		AccessRequestDto accessRequestDto = AccessRequestDto.builder()
+				.channel(requestAccessEntity.getRequester())
+				.text(text.toString())
+				.build();
+		if (isApproved) {
+			ActionsDto submit = getActionsDto(requestAccessEntity, "Submit", "https://mattermost-slash-commands.herokuapp.com/request-access/approve/user");
+			List<ActionsDto> actionsDtos = Arrays.asList(submit);
+			AttachmentDto attachmentDto = AttachmentDto.builder()
+					.text("Click button below to submit that you have requested permissions.")
+					.actions(actionsDtos)
+					.build();
+			List<AttachmentDto> attachmentDtoList = Arrays.asList(attachmentDto);
+			accessRequestDto.setAttachments(attachmentDtoList);
+		}
 		sendRequestAccess(accessRequestDto);
 	}
 
@@ -210,5 +229,16 @@ public class RequestAccessService {
 			return "@" + matcher.group(1);
 		}
 		return "";
+	}
+
+	public void approveRequestAccessByUser(String requestBody) {
+		long id = findRequestId(requestBody);
+		RequestAccessEntity requestAccessEntity = requestAccessDao.getRequestAccess(id);
+		if (requestAccessEntity == null) {
+			log.error("requestAccessEntity is null");
+			return;
+		}
+		requestAccessEntity.setState(RequestAccessState.APPROVED_BY_USER);
+		requestAccessDao.updateRequestAccess(requestAccessEntity);
 	}
 }
